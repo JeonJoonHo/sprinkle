@@ -1,0 +1,72 @@
+package com.joonho.sprinkle.service;
+
+import com.joonho.sprinkle.controller.request.CreateSprinkleRequest;
+import com.joonho.sprinkle.controller.response.CreateSprinkleResponse;
+import com.joonho.sprinkle.model.Sprinkle;
+import com.joonho.sprinkle.model.SprinkleTarget;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class CreateSprinkleServiceTest {
+
+    @InjectMocks
+    private CreateSprinkleService createSprinkleService;
+
+    @Mock
+    private SprinkleService sprinkleService;
+
+    @Mock
+    private SprinkleTargetService sprinkleTargetService;
+
+    private Integer targetNumbers = 3;
+    private Integer amount = 10000;
+    private Long userId = 1L;
+    private String roomId = "room";
+
+    private CreateSprinkleRequest createSprinkleRequest = new CreateSprinkleRequest(amount, targetNumbers);
+
+    @BeforeEach
+    void setUp() {
+        when(sprinkleTargetService.buildSprinkleTarget(any(Sprinkle.class), anyInt())).thenReturn(SprinkleTarget.builder().build());
+    }
+
+    @Test
+    void Sprinkle_객체를_생성하기위해_Save_함수를_호출한다() {
+        createSprinkleService.sprinkle(createSprinkleRequest, userId, roomId);
+
+        verify(sprinkleService, times(1)).save(any(Sprinkle.class));
+    }
+
+    @Test
+    void Sprinkle_객체의_토큰을_반환한다() {
+        CreateSprinkleResponse response = createSprinkleService.sprinkle(createSprinkleRequest, userId, roomId);
+
+        assertThat(response.getToken().length()).isEqualTo(3);
+    }
+
+    @Test
+    void 뿌릴_인원만큼_Sprinkle_Target을_추가한다() {
+        createSprinkleService.sprinkle(createSprinkleRequest, userId, roomId);
+
+        verify(sprinkleTargetService, times(targetNumbers)).buildSprinkleTarget(any(Sprinkle.class), anyInt());
+    }
+
+    @Test
+    void 뿌릴_금액을_뿌릴_인원만큼_분배한다() {
+        createSprinkleService.sprinkle(createSprinkleRequest, userId, roomId);
+
+        verify(sprinkleTargetService, times(2)).buildSprinkleTarget(any(Sprinkle.class), eq(3333));
+        verify(sprinkleTargetService, times(1)).buildSprinkleTarget(any(Sprinkle.class), eq(3334));
+    }
+
+}
