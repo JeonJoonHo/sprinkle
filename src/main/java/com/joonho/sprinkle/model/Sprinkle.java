@@ -33,7 +33,8 @@ public class Sprinkle {
 
     private Long sender;
 
-    private LocalDateTime expiredAt;
+    @Builder.Default
+    private LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(10);
 
     @OneToMany(mappedBy = "sprinkle", cascade = CascadeType.ALL)
     @Builder.Default
@@ -50,7 +51,7 @@ public class Sprinkle {
     }
 
     public Boolean isExpire(LocalDateTime targetDateTime) {
-        return this.expiredAt.isAfter(targetDateTime);
+        return this.expiredAt.isBefore(targetDateTime);
     }
 
     public Boolean isOwner(Long userId) {
