@@ -21,7 +21,7 @@ public class CreateSprinkleService {
     @Transactional
     public CreateSprinkleResponse sprinkle(CreateSprinkleRequest createSprinkleRequest, Long userId, String roomId) {
         Sprinkle sprinkle = Sprinkle.builder()
-                .rommId(roomId)
+                .roomId(roomId)
                 .sender(userId)
                 .expiredAt(LocalDateTime.now().plusMinutes(10))
                 .build();

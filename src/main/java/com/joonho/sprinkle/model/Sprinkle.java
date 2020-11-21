@@ -46,6 +46,9 @@ public class Sprinkle {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+
+    public static final int CAN_LOOK_UP_DAY = 7;
+
     public void addTarget(SprinkleTarget sprinkleTarget) {
         this.sprinkleTargets.add(sprinkleTarget);
     }
@@ -63,8 +66,8 @@ public class Sprinkle {
     }
 
     public Boolean isCanLookup(Long userId) {
-        if (this.createdAt.isBefore(LocalDateTime.now().minusDays(7))) return false;
+        if (LocalDateTime.now().isAfter(this.createdAt.plusDays(CAN_LOOK_UP_DAY))) return false;
 
-        return this.isOwner(userId);
+        return !this.isOwner(userId);
     }
 }
