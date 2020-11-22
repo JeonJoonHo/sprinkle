@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,8 @@ public class CreateSprinkleService {
         });
 
         sprinkleService.save(sprinkle);
+
+        sprinkle.updateToken(UUID.randomUUID().toString().substring(0, 3));
 
         return new CreateSprinkleResponse(sprinkle.getToken());
     }

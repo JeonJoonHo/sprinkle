@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface SprinkleTargetRepository extends JpaRepository<SprinkleTarget, Long> {
     Boolean existsBySprinkleAndReceiver(Sprinkle sprinkle, Long receiver);
-    List<SprinkleTarget> findAllBySprinkleAndReceiverIsNotNull(Sprinkle sprinkle);
+    List<SprinkleTarget> findAllBySprinkleAndReceiverIsNull(Sprinkle sprinkle);
 }

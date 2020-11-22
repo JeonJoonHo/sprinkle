@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -37,7 +39,8 @@ public class CreateSprinkleServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(sprinkleTargetService.buildSprinkleTarget(any(Sprinkle.class), anyInt())).thenReturn(SprinkleTarget.builder().build());
+        Sprinkle sprinkle = Sprinkle.builder().roomId("room").sender(1L).expiredAt(LocalDateTime.now().plusMinutes(10)).build();
+        when(sprinkleTargetService.buildSprinkleTarget(any(Sprinkle.class), anyInt())).thenReturn(SprinkleTarget.builder().amount(1000).sprinkle(sprinkle).build());
     }
 
     @Test

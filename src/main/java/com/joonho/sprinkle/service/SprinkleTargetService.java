@@ -15,6 +15,18 @@ public class SprinkleTargetService {
 
     private final SprinkleTargetRepository sprinkleTargetRepository;
 
+    @Transactional
+    public Integer allocateTarget(Sprinkle sprinkle, Long userId) {
+        List<SprinkleTarget> sprinkleTargets = findAllBySprinkleAndReceiverIsNull(sprinkle);
+
+        if (sprinkleTargets.isEmpty()) return 0;
+
+        SprinkleTarget selectedSprinkleTarget = sprinkleTargets.get(0);
+        selectedSprinkleTarget.updateReceiver(userId);
+
+        return selectedSprinkleTarget.getAmount();
+    }
+
     SprinkleTarget buildSprinkleTarget(Sprinkle sprinkle, Integer dividedAmount) {
 
         return SprinkleTarget.builder().amount(dividedAmount).sprinkle(sprinkle).build();
@@ -24,17 +36,7 @@ public class SprinkleTargetService {
         return sprinkleTargetRepository.existsBySprinkleAndReceiver(sprinkle, receiver);
     }
 
-    @Transactional
-    Integer allocateTarget(Sprinkle sprinkle, Long userId) {
-        List<SprinkleTarget> sprinkleTargets = findAllBySprinkleAndReceiverIsNotNull(sprinkle);
-
-        SprinkleTarget selectedSprinkleTarget = sprinkleTargets.get(0);
-        selectedSprinkleTarget.updateReceiver(userId);
-
-        return selectedSprinkleTarget.getAmount();
-    }
-
-    private List<SprinkleTarget> findAllBySprinkleAndReceiverIsNotNull(Sprinkle sprinkle) {
-        return sprinkleTargetRepository.findAllBySprinkleAndReceiverIsNotNull(sprinkle);
+    List<SprinkleTarget> findAllBySprinkleAndReceiverIsNull(Sprinkle sprinkle) {
+        return sprinkleTargetRepository.findAllBySprinkleAndReceiverIsNull(sprinkle);
     }
 }

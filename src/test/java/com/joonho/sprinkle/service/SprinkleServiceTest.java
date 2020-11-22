@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -32,9 +33,13 @@ public class SprinkleServiceTest {
 
     @Test void Token으로_조회를_성공하면_Sprinkle을_반환한다() {
         String token = "token";
-        Sprinkle mockSprinkle = Sprinkle.builder().build();
+        Sprinkle sprinkle = Sprinkle.builder()
+                .sender(999L)
+                .roomId("room")
+                .expiredAt(LocalDateTime.now().plusMinutes(10))
+                .build();
 
-        when(sprinkleRepository.findByToken(token)).thenReturn(Optional.of(mockSprinkle));
+        when(sprinkleRepository.findByToken(token)).thenReturn(Optional.of(sprinkle));
 
         assertThat(sprinkleService.findByToken(token)).isInstanceOf(Sprinkle.class);
     }
@@ -48,15 +53,21 @@ public class SprinkleServiceTest {
                 .withMessage("조회 할 수 없습니다.");
     }
 
-    @Test void 생성일이_7일이_지난_Sprinkle을_조회하면_BadRequestException을_발생시킨다() {
+    @Test void 일주일이_지난_Sprinkle을_조회하면_BadRequestException을_발생시킨다() throws NoSuchFieldException, IllegalAccessException {
         String token = "token";
         Long userId = 1L;
-        Sprinkle mockSprinkle = Sprinkle.builder()
-                .createdAt(LocalDateTime.now().minusDays(10))
+        Sprinkle sprinkle = Sprinkle.builder()
                 .sender(999L)
+                .roomId("room")
+                .expiredAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
-        doReturn(mockSprinkle).when(sprinkleService).findByToken(token);
+        Field createdAtField = sprinkle.getClass().getDeclaredField("createdAt");
+        createdAtField.setAccessible(true);
+
+        createdAtField.set(sprinkle, LocalDateTime.now().minusDays(10));
+
+        doReturn(sprinkle).when(sprinkleService).findByToken(token);
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() ->
                 sprinkleService.lookup(token, userId))
@@ -66,27 +77,29 @@ public class SprinkleServiceTest {
     @Test void 자신의_Sprinkle을_조회하면_BadRequestException을_발생시킨다() {
         String token = "token";
         Long userId = 1L;
-        Sprinkle mockSprinkle = Sprinkle.builder()
-                .createdAt(LocalDateTime.now())
+        Sprinkle sprinkle = Sprinkle.builder()
                 .sender(userId)
+                .roomId("room")
+                .expiredAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
-        doReturn(mockSprinkle).when(sprinkleService).findByToken(token);
+        doReturn(sprinkle).when(sprinkleService).findByToken(token);
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() ->
-                sprinkleService.lookup(token, userId))
+                sprinkleService.lookup(token, 999L))
                 .withMessage("조회 할 수 없습니다.");
     }
 
     @Test void 조회가_가능한_Sprinkle을_조회하면_LookupSprinkleResponse를_반환한다() {
         String token = "token";
         Long userId = 1L;
-        Sprinkle mockSprinkle = Sprinkle.builder()
-                .createdAt(LocalDateTime.now())
-                .sender(999L)
+        Sprinkle sprinkle = Sprinkle.builder()
+                .sender(userId)
+                .roomId("room")
+                .expiredAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
-        doReturn(mockSprinkle).when(sprinkleService).findByToken(token);
+        doReturn(sprinkle).when(sprinkleService).findByToken(token);
 
         assertThat(sprinkleService.lookup(token, userId)).isInstanceOf(LookupSprinkleResponse.class);
 

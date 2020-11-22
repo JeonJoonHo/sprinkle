@@ -1,14 +1,27 @@
 package com.joonho.sprinkle.controller.request;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateSprinkleRequest {
+    @NotNull(message = "amount must not amount")
     private Integer amount;
+
+    @NotNull(message = "targetNumbers must not amount")
     private Integer targetNumbers;
+
+    public CreateSprinkleRequest(Integer amount, Integer targetNumbers) {
+        this.amount = amount;
+        this.targetNumbers = targetNumbers;
+    }
 
     public List<Integer> divideAmount() {
         Integer divideAmount = (int)Math.floor(this.amount / this.targetNumbers);

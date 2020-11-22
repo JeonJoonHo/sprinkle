@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 public class SprinkleController {
@@ -23,7 +25,7 @@ public class SprinkleController {
 
     @PostMapping("/api/sprinkles")
     ResponseEntity<CreateSprinkleResponse> create(
-            @RequestBody CreateSprinkleRequest createSprinkleRequest,
+            @Valid @RequestBody CreateSprinkleRequest createSprinkleRequest,
             @RequestHeader("X-ROOM-ID") String roomId,
             @RequestHeader("X-USER-ID") Long userId
     ) {
