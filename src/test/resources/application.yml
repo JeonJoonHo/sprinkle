@@ -1,9 +1,13 @@
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3307/sprinkle-test?useSSL=false
+    url: jdbc:mysql://127.0.0.1:3307/sprinkle_test?useSSL=false
     username: root
     password: mysql
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
   jpa:
     hibernate:
       ddl-auto: create
