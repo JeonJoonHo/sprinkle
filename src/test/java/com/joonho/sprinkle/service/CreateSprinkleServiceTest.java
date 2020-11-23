@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,4 +74,18 @@ public class CreateSprinkleServiceTest {
         verify(sprinkleTargetService, times(1)).buildSprinkleTarget(any(Sprinkle.class), eq(3334));
     }
 
+    @Test
+    void 유니크한_토큰을_생성하기_위해_총_3번_검사를_진행하고_그럼에도_유니크하지_않다면_특수문자를_추가한다() {
+        List<String> characters = Arrays.asList("~", "`", "!", "@", "#",
+                "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "{",
+                "]", "}", "\\", "|", ";", ":", "\"", "\"", ",", "<", ".", ">", "/",
+                "?");
+
+        when(sprinkleService.existsByToken(anyString())).thenReturn(true);
+
+        CreateSprinkleResponse createSprinkleResponse = createSprinkleService.sprinkle(createSprinkleRequest, userId, roomId);
+
+        verify(sprinkleService, times(3)).existsByToken(anyString());
+        assertThat(characters.contains(createSprinkleResponse.getToken().substring(2, 3))).isTrue();
+    }
 }

@@ -40,7 +40,7 @@ public class ReceiveSprinkleServiceTest {
                 .build();
 
         when(sprinkleService.findByToken(token)).thenReturn(sprinkle);
-        when(sprinkleTargetService.allocateTarget(sprinkle, userId)).thenReturn(1000);
+        when(sprinkleTargetService.allocateTargetWithRedisLock(sprinkle, userId)).thenReturn(1000);
 
         assertThat(receiveSprinkleService.receive(token, roomId, userId)).isInstanceOf(ReceiveSprinkleResponse.class);
     }
@@ -53,11 +53,11 @@ public class ReceiveSprinkleServiceTest {
                 .build();
 
         when(sprinkleService.findByToken(token)).thenReturn(sprinkle);
-        when(sprinkleTargetService.allocateTarget(sprinkle, userId)).thenReturn(1000);
+        when(sprinkleTargetService.allocateTargetWithRedisLock(sprinkle, userId)).thenReturn(1000);
 
         receiveSprinkleService.receive(token, roomId, userId);
 
-        verify(sprinkleTargetService, times(1)).allocateTarget(sprinkle, userId);
+        verify(sprinkleTargetService, times(1)).allocateTargetWithRedisLock(sprinkle, userId);
     }
 
     @Test void 시간이_만료된_뿌리기에_접근하면_Exception을_발생시킨다() throws NoSuchFieldException, IllegalAccessException {
@@ -76,7 +76,7 @@ public class ReceiveSprinkleServiceTest {
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() -> receiveSprinkleService.receive(token, roomId, userId))
                 .withMessage("뿌리기가 종료되었습니다.");
-        verify(sprinkleTargetService, never()).allocateTarget(sprinkle, userId);
+        verify(sprinkleTargetService, never()).allocateTargetWithRedisLock(sprinkle, userId);
     }
 
     @Test void 뿌리기를_보낸_사람이면_Exception을_발생시킨다() {
@@ -90,7 +90,7 @@ public class ReceiveSprinkleServiceTest {
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() -> receiveSprinkleService.receive(token, roomId, userId))
                 .withMessage("본인은 받을 수 없습니다.");
-        verify(sprinkleTargetService, never()).allocateTarget(sprinkle, userId);
+        verify(sprinkleTargetService, never()).allocateTargetWithRedisLock(sprinkle, userId);
     }
 
     @Test void 뿌리기를_보낸_채팅방이_아니면_Exception을_발생시킨다() {
@@ -104,7 +104,7 @@ public class ReceiveSprinkleServiceTest {
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() -> receiveSprinkleService.receive(token, roomId, userId))
                 .withMessage("잘 못된 접근입니다.");
-        verify(sprinkleTargetService, never()).allocateTarget(sprinkle, userId);
+        verify(sprinkleTargetService, never()).allocateTargetWithRedisLock(sprinkle, userId);
     }
 
     @Test void 이미_지급_받은_내역이_있으면_Exception을_발생시킨다() {
@@ -119,7 +119,7 @@ public class ReceiveSprinkleServiceTest {
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() -> receiveSprinkleService.receive(token, roomId, userId))
                 .withMessage("이미 지급 받았습니다.");
-        verify(sprinkleTargetService, never()).allocateTarget(sprinkle, userId);
+        verify(sprinkleTargetService, never()).allocateTargetWithRedisLock(sprinkle, userId);
     }
 
     @Test void 할당_함수에서_0을_반환받으면_Exception을_발생시킨다() {
@@ -130,7 +130,7 @@ public class ReceiveSprinkleServiceTest {
                 .build();
 
         when(sprinkleService.findByToken(token)).thenReturn(sprinkle);
-        when(sprinkleTargetService.allocateTarget(sprinkle, userId)).thenReturn(0);
+        when(sprinkleTargetService.allocateTargetWithRedisLock(sprinkle, userId)).thenReturn(0);
 
         assertThatExceptionOfType(BadRequestException.class).isThrownBy(() -> receiveSprinkleService.receive(token, roomId, userId))
                 .withMessage("뿌리기가 종료되었습니다.");

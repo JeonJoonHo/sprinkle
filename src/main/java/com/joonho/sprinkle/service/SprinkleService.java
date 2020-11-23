@@ -20,6 +20,10 @@ public class SprinkleService {
                 .orElseThrow(() -> new NotFoundException(token, "조회 할 수 없습니다."));
     }
 
+    public Boolean existsByToken(String token) {
+        return sprinkleRepository.existsByToken(token);
+    }
+
     public LookupSprinkleResponse lookup(String token, Long userId) {
         Sprinkle sprinkle = findByToken(token);
 

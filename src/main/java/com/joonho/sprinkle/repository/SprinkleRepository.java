@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface SprinkleRepository extends JpaRepository<Sprinkle, Long> {
     Optional<Sprinkle> findByToken(String token);
+    Boolean existsByToken(String token);
 }

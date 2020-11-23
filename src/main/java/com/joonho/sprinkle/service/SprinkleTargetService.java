@@ -21,10 +21,10 @@ public class SprinkleTargetService {
     private final RedissonClient redissonClient;
 
     @Transactional
-    public Integer allocateTarget(Sprinkle sprinkle, Long userId) {
+    public Integer allocateTargetWithRedisLock(Sprinkle sprinkle, Long userId) {
         RLock lock = redissonClient.getLock("allocate_target_" + sprinkle.getToken());
 
-        boolean res = false;
+        boolean res;
         try {
             res = lock.tryLock(60, 20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -34,18 +34,22 @@ public class SprinkleTargetService {
         if (!res) throw new BadRequestException(sprinkle.getId(), "다시 시도해주세요.");
 
         try {
-            List<SprinkleTarget> sprinkleTargets = findAllBySprinkleAndReceiverIsNull(sprinkle);
-
-            if (sprinkleTargets.isEmpty()) return 0;
-
-            SprinkleTarget selectedSprinkleTarget = sprinkleTargets.get(0);
-            selectedSprinkleTarget.updateReceiver(userId);
-
-            return selectedSprinkleTarget.getAmount();
+            return allocateTarget(sprinkle, userId);
         }
         finally {
             lock.unlock();
         }
+    }
+
+    public Integer allocateTarget(Sprinkle sprinkle, Long userId) {
+        List<SprinkleTarget> sprinkleTargets = findAllBySprinkleAndReceiverIsNull(sprinkle);
+
+        if (sprinkleTargets.isEmpty()) return 0;
+
+        SprinkleTarget selectedSprinkleTarget = sprinkleTargets.get(0);
+        selectedSprinkleTarget.updateReceiver(userId);
+
+        return selectedSprinkleTarget.getAmount();
     }
 
     SprinkleTarget buildSprinkleTarget(Sprinkle sprinkle, Integer dividedAmount) {

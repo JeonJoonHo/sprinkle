@@ -23,7 +23,7 @@ public class ReceiveSprinkleService {
         if (!sprinkle.isEqualRoom(roomId)) throw new BadRequestException(sprinkle.getId(), "잘 못된 접근입니다.");
         if (sprinkleTargetService.existsBySprinkleAndReceiver(sprinkle, userId)) throw new BadRequestException(sprinkle.getId(), "이미 지급 받았습니다.");;
 
-        Integer amount = sprinkleTargetService.allocateTarget(sprinkle, userId);
+        Integer amount = sprinkleTargetService.allocateTargetWithRedisLock(sprinkle, userId);
 
         if (amount == 0) throw new BadRequestException(sprinkle.getId(), "뿌리기가 종료되었습니다.");
 
